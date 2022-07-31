@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 # Lectura de archivo
-df = pd.read_csv('data_test (1).csv', sep = ';')
+df = pd.read_csv('https://raw.githubusercontent.com/wagamezj/prueba_xepelin/main/data_test%20(1).csv', sep = ';')
 # Se seleccionan solo las transacciones validas que me generan una fecha
 df = df[df.status == 'PAID']
 # Cambio de la estructura de la fecha
