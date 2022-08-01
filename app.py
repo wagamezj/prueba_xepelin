@@ -169,6 +169,7 @@ este dato por el historico Xepelin se estima que este financiado entre el 0.4 y 
 '''
 app = Dash(__name__)
 
+server = app.server
 
 colors = {
     'background': '#f8f8ff',
