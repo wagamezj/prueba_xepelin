@@ -238,7 +238,7 @@ app.layout = html.Div(
      html.Div([
          dcc.Graph(
             id='grafica7',
-            figure=fig7)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+            figure=fig7)], style={'width': '30%', 'display': 'inline-block', 'padding': '0 20'}),
      
     html.Div([
          dcc.Graph(
