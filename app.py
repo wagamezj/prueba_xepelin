@@ -46,19 +46,19 @@ fig.add_trace(go.Scatter(x=fin_mounth['mes_id'], y=fin_mounth['finan'],
 
 
 fig.update_layout(
-    title_text="Relación monto vs Financiación"
+    title_text="RELACION MONTO VS FINANCIACÓN"
 )
 
 # Codigo Grafico 2
 fig2 = go.Figure()
 fin_mounth = df.groupby('mes_id')['amountfinancedByXepelin'].sum().reset_index()
-fig2 = px.bar(fin_mounth, x = 'mes_id', y = 'amountfinancedByXepelin' ,title="Monto financiado por Xepelin")
+fig2 = px.bar(fin_mounth, x = 'mes_id', y = 'amountfinancedByXepelin' ,title="MONTOS FINANCIADOS POR XEPELIN")
 
 
 # Codigo grafico 3
 fig3 = go.Figure()
 client2 = df.groupby('PayerId')['amountfinancedByXepelin'].sum().reset_index()
-fig3 = px.bar(client2, x = 'PayerId', y = 'amountfinancedByXepelin',title="Montos financiados segun el tipo de cliente")
+fig3 = px.bar(client2, x = 'PayerId', y = 'amountfinancedByXepelin',title="MONTOS FINANCIADOS SEGUN TIPO DE CLIENTE")
 
 # Codigo grafico 4
 
@@ -69,7 +69,7 @@ client = client.rename(columns={'PayerId':'freq'}).reset_index()
 client['Ind_fina'] = client.amountfinancedByXepelin/client.amount
 client.sort_values(by=['amount'], inplace=False,ascending=False)
 fig4 = go.Figure()
-fig4 = px.bar(client, x = 'PayerId', y = 'freq',title="Frecuencia de clientes en la plataforma")
+fig4 = px.bar(client, x = 'PayerId', y = 'freq',title="FRECUENCIA DE FINANCIAMIENTO DE CLIENTES")
 
 # Codigo grafico 5
 
@@ -90,7 +90,7 @@ fig5 = go.Figure()
 
 fig5.add_trace(go.Scatter(x=mes, y=nuevos_id,
                     mode='lines',
-                    name='Porcentaje de Financiacion',
+                    name='PORCENTAJE DE FINANCIACIÓN',
                     ),
                     )
 
@@ -103,7 +103,7 @@ fig5.update_layout(
 # Codigo Figura 6
 
 serie1 = df.groupby(['paidAt','mes_id'])['amount'].sum().reset_index()
-fig6 = px.line(serie1, x='paidAt', y="amount",title="Montos diarios transados en la plataforma")
+fig6 = px.line(serie1, x='paidAt', y="amount",title="MONTOS DIARIOS TRANSADOS")
 
 
 # Codigo Figura 7
@@ -122,6 +122,7 @@ forecast = m.predict(future)
 
 from prophet.plot import plot_plotly, plot_components_plotly
 fig7 =  plot_plotly(m, forecast)
+fig7.update_layout(title_text='TENDENCIAS DE VOLUMENES TRANSADOS EN LA PLATAFORMA')
 
 
 # Codigo Figura 8
@@ -141,35 +142,34 @@ fig8 = go.Figure(data=[go.Bar(
     marker_color=colors # marker color can be a single color value or an iterable
 )])
 
-fig8.update_layout(title_text='Prediccion mes octubre')
+fig8.update_layout(title_text='PREDICCION DE VOLUMEN MES DE OCTUBRE')
 
 
 text1 = '''
 Graficas descriptivas que buscan entender como está funcionando el modelo de datos y las relaciones que podemos obtener para 
 plantear un mejor modelo tendencial y predictivo.
 el % de financiacion de un producto puede llegar a variar oscilando en meses de 0.78 y 0.4
-aproximadamen indicandome algunos meses con un potencial de crecimiento en la financiacón de los clientes
+aproximadamen indicandome que hay algunos meses en los cuales se tiene un potencial de crecimiento mayor
+
 '''
 
 text2= '''
 Las frecuencias y la caracterizacion de los clientes nos ayuda a entender del total de
-empresas como se esta presetando la financiación y cual es la deuda generada motivo de la financiacion para cada cliente
-La caracterización de las 
-transacciones y revisar como es la frecuencia de usso de cada cliente su % de financiacion total y el
-porcentaje de crecimiento
+empresas como es su financiacion  y cual es la deuda generada para cada empresa
+De esta forma me da un analisis detalldo en un intervalo de tiempo en como se esta desarrollando la frecuencia de uso y como se podrian impactar
+metricas de crecimiento
 '''
 
 
 text3= '''
 Podemos encontrar facilmente una tendencia de uso de los datos en la plataforma que nos ayuden a consolidar un 
 estimado para el mes de octubre claro basado en la identificacion de patrones ubicados en las transacciones del pasado, de 
-este dato por el historico Xepelin se estima que este financiado entre el 0.4 y 0.7
-
+este dato por el historico Xepelin se estima que este financiado entre el 0.4 y 0.7  podriamos entonces generar una 
+financiacion aproximada del total estimado de $ 3,926,147 una financiación por la plataforma de $2,355,688.20
 
 '''
 app = Dash(__name__)
 
-server = app.server
 
 colors = {
     'background': '#f8f8ff',
@@ -235,6 +235,11 @@ app.layout = html.Div(
             id='grafica6',
             figure=fig6)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
         
+     html.Div(children=text3, style={
+        'textAlign': 'left'
+      
+    }),
+        
      html.Div([
          dcc.Graph(
             id='grafica7',
@@ -243,13 +248,10 @@ app.layout = html.Div(
     html.Div([
          dcc.Graph(
             id='grafica8',
-            figure=fig8)], style={'width': '40%', 'display': 'inline-block', 'padding': '0 20'}),
+            figure=fig8)], style={'width': '68%', 'display': 'inline-block', 'padding': '0 20'})
         
         
-    html.Div(children=text3, style={
-        'textAlign': 'left'
-      
-    })
+   
         
     
     
@@ -262,3 +264,5 @@ app.layout = html.Div(
 
 if __name__ == '__main__':
     app.run_server(port = 4050,host='0.0.0.0')
+
+    
