@@ -167,7 +167,7 @@ este dato por el historico Xepelin se estima que este financiado entre el 0.4 y 
 
 
 '''
-app = Dash(__name__, host='0.0.0.0')
+app = Dash(__name__)
 
 server = app.server
 
