@@ -3,8 +3,9 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from PIL import Image
 
-
+pil_img = Image.open("xepelin_horizontal.jpg")
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -51,13 +52,13 @@ fig.update_layout(
 # Codigo Grafico 2
 fig2 = go.Figure()
 fin_mounth = df.groupby('mes_id')['amountfinancedByXepelin'].sum().reset_index()
-fig2 = px.bar(fin_mounth, x = 'mes_id', y = 'amountfinancedByXepelin' )
+fig2 = px.bar(fin_mounth, x = 'mes_id', y = 'amountfinancedByXepelin' ,title="Monto financiado por Xepelin")
 
 
 # Codigo grafico 3
 fig3 = go.Figure()
 client2 = df.groupby('PayerId')['amountfinancedByXepelin'].sum().reset_index()
-fig3 = px.bar(client2, x = 'PayerId', y = 'amountfinancedByXepelin')
+fig3 = px.bar(client2, x = 'PayerId', y = 'amountfinancedByXepelin',title="Montos financiados segun el tipo de cliente")
 
 # Codigo grafico 4
 
@@ -68,7 +69,7 @@ client = client.rename(columns={'PayerId':'freq'}).reset_index()
 client['Ind_fina'] = client.amountfinancedByXepelin/client.amount
 client.sort_values(by=['amount'], inplace=False,ascending=False)
 fig4 = go.Figure()
-fig4 = px.bar(client, x = 'PayerId', y = 'freq')
+fig4 = px.bar(client, x = 'PayerId', y = 'freq',title="Frecuencia de clientes en la plataforma")
 
 # Codigo grafico 5
 
@@ -89,7 +90,8 @@ fig5 = go.Figure()
 
 fig5.add_trace(go.Scatter(x=mes, y=nuevos_id,
                     mode='lines',
-                    name='Porcentaje de Financiacion' ),
+                    name='Porcentaje de Financiacion',
+                    ),
                     )
 
 
@@ -101,9 +103,70 @@ fig5.update_layout(
 # Codigo Figura 6
 
 serie1 = df.groupby(['paidAt','mes_id'])['amount'].sum().reset_index()
-fig6 = px.line(serie1, x='paidAt', y="amount")
+fig6 = px.line(serie1, x='paidAt', y="amount",title="Montos diarios transados en la plataforma")
 
 
+# Codigo Figura 7
+from prophet import Prophet
+serie = df.groupby(['mes_id'])['amount'].sum().reset_index()
+serie = serie[serie.mes_id != '2021-02']
+serie = serie[serie.mes_id != '2021-03']
+
+serie.rename(columns = {'mes_id':'ds', 'amount':'y'}, inplace = True)
+m = Prophet()
+m.fit(serie)
+
+future = m.make_future_dataframe(periods = 1)
+future.iloc[6] = '2021-10-01 00:00:00'
+forecast = m.predict(future)
+
+from prophet.plot import plot_plotly, plot_components_plotly
+fig7 =  plot_plotly(m, forecast)
+
+
+# Codigo Figura 8
+
+serie = df.groupby(['mes_id'])['amount'].sum().reset_index()
+y = []
+for i in serie.amount:
+    y += i,
+y += 3926147.223685805,
+
+colors = ['lightslategray',] * 9
+colors[8] = 'crimson'
+
+fig8 = go.Figure(data=[go.Bar(
+    x=['2021-02','2021-03','2021-04', '2021-05', '2021-06', '2021-07', '2021-08', '2021-09','2021-10'],
+    y=y,
+    marker_color=colors # marker color can be a single color value or an iterable
+)])
+
+fig8.update_layout(title_text='Prediccion mes octubre')
+
+
+text1 = '''
+Graficas descriptivas que buscan entender como está funcionando el modelo de datos y las relaciones que podemos obtener para 
+plantear un mejor modelo tendencial y predictivo.
+el % de financiacion de un producto puede llegar a variar oscilando en meses de 0.78 y 0.4
+aproximadamen indicandome algunos meses con un potencial de crecimiento en la financiacón de los clientes
+'''
+
+text2= '''
+Las frecuencias y la caracterizacion de los clientes nos ayuda a entender del total de
+empresas como se esta presetando la financiación y cual es la deuda generada motivo de la financiacion para cada cliente
+La caracterización de las 
+transacciones y revisar como es la frecuencia de usso de cada cliente su % de financiacion total y el
+porcentaje de crecimiento
+'''
+
+
+text3= '''
+Podemos encontrar facilmente una tendencia de uso de los datos en la plataforma que nos ayuden a consolidar un 
+estimado para el mes de octubre claro basado en la identificacion de patrones ubicados en las transacciones del pasado, de 
+este dato por el historico Xepelin se estima que este financiado entre el 0.4 y 0.7
+
+
+'''
 app = Dash(__name__)
 
 
@@ -116,13 +179,10 @@ colors = {
 app.layout = html.Div(
     
     style={'backgroundColor': colors['background'],'width': '100%'}, children=[
+        html.Img(src=pil_img, width = 300),
         
-        html.Img(
-        src='xepelin_horizontal.jpg'
-        
-        ),
         html.H1(
-        children='DASH DESCRIPCION TRANSACCIONES',
+        children='DASH DESCRIPCIÓN TRANSACCIONES',
         style={
             'textAlign': 'center',
             'color': colors['text']
@@ -131,7 +191,7 @@ app.layout = html.Div(
 
     html.Div(children='Wilmer Jesus Agamez Julio', style={
         'textAlign': 'center',
-        'color': colors['text']
+        'color':colors['text']
     }),
         
     html.Div([
@@ -142,6 +202,14 @@ app.layout = html.Div(
          dcc.Graph(
             id='grafica2',
             figure=fig2)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+    
+    html.Div(children=text1, style={
+        'textAlign': 'left'
+      
+    }),
+
+        
+    
     html.Div([
          dcc.Graph(
             id='grafica3',
@@ -150,6 +218,13 @@ app.layout = html.Div(
          dcc.Graph(
             id='grafica4',
             figure=fig4)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+        
+     
+    html.Div(children=text2, style={
+        'textAlign': 'left'
+      
+    }),
+
      html.Div([
          dcc.Graph(
             id='grafica5',
@@ -157,7 +232,26 @@ app.layout = html.Div(
     html.Div([
          dcc.Graph(
             id='grafica6',
-            figure=fig6)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'})
+            figure=fig6)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+        
+     html.Div([
+         dcc.Graph(
+            id='grafica7',
+            figure=fig7)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+     
+    html.Div([
+         dcc.Graph(
+            id='grafica8',
+            figure=fig8)], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+        
+        
+    html.Div(children=text3, style={
+        'textAlign': 'left'
+      
+    })
+        
+    
+    
     
         
     ,
@@ -165,6 +259,5 @@ app.layout = html.Div(
 
 
 
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(port = 4050)
